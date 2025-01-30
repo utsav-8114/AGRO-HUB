@@ -47,9 +47,6 @@ def get_users():
     users_list = [{"id": user.id, "username": user.username, "password": user.password} for user in users]
     return jsonify(users_list)  # Return the list of users as JSON
 
-@app.route("/")
-def hello_world():
-    return "hello world"
 
 
 
