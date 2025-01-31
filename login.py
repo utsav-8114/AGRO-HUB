@@ -1,5 +1,6 @@
 from flask import Flask,request,jsonify
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash,check_password_hash
 import requests
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///users.db'#for creating the database
@@ -15,13 +16,14 @@ class User(db.Model):#Defines a database table called user
 with app.app_context():
     db.create_all()
 #making login route
+
 @app.route("/login",methods=["POST"])
-def cust_login():
+def cust_login(): 
     data=request.get_json()
     cust_username=data.get("username")
     cust_pass=data.get("password")
     user=User.query.filter_by(username=cust_username).first()
-    if user and user.password==cust_pass:
+    if user and check_password_hash(user.password,cust_pass):
         return jsonify({"message":"login is successful!","username":user.username}),200
     else:
         return jsonify({"message":"Invalid credentials "}),401
@@ -32,8 +34,9 @@ def cust_register():
     data=request.get_json()
     cust_username=data.get("username")
     cust_pass= data.get("password")
+    hashed_password = generate_password_hash(cust_pass)
     
-    user=User(username=cust_username,password=cust_pass)
+    user=User(username=cust_username,password=hashed_password)
     db.session.add(user)
     db.session.commit()
     return jsonify("User registered successfully")
